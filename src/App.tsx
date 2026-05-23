@@ -149,7 +149,7 @@ export default function App() {
           {/* Logo & Meta */}
           <div className="flex items-baseline gap-3">
             <h1 className="text-2xl font-bold tracking-tighter col-span-1">RRT.ENGINE</h1>
-            <span className="font-serif italic text-sm opacity-60">Relational Reasoning Training / v0.1.0-alpha</span>
+            <span className="font-serif italic text-sm opacity-60">Meta Relational Reasoning Training / v1.0.0</span>
           </div>
 
           {/* Quick HUD tracker */}
@@ -290,22 +290,20 @@ export default function App() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-xs text-[#141414] leading-relaxed font-sans z-10">
                   
                   <div className="flex flex-col gap-4">
-                    <h3 className="font-sans font-bold text-[#141414] border-l-3 border-[#141414] pl-2 text-sm uppercase tracking-wider">What is Relational Reasoning?</h3>
+                    <h3 className="font-sans font-bold text-[#141414] border-l-3 border-[#141414] pl-2 text-sm uppercase tracking-wider">What is Context-Shifting RRT?</h3>
                     <p>
-                      <strong>Relational Reasoning</strong> is the cognitive capacity to analyze, compare, and integrate complex relationships between objects or ideas. It is the primary neuro-correlate of <strong>Fluid Intelligence ($Gf$)</strong>, governing spatial orientation, executive planning, and high-order logic structures.
+                      <strong>Meta RRT</strong> is a dynamic relational reasoning paradigm where directional relationships are not static constraints. By treating relations themselves as mutable contexts, complexity scales exponentially through multi-variable context windows rather than a high working memory node-count.
                     </p>
                     <p>
-                      Traditional IQ tests utilize 2D visual matrices. However, RRT utilizes multi-dimensional vector systems to force the parietal cortex to model higher dimensions (3D and 4D Ana/Kata cubes), boosting spatial working memory capacity.
+                      Instead of tracking a long linear chain of static variables on a flat Euclidean grid, this paradigm forces cognitive branching and context gating. The user must isolate node relations, track simultaneous vector shifts across independent dimensions, and evaluate target projections across transformed spatial manifolds.
                     </p>
-                    <h3 className="font-sans font-bold text-[#141414] border-l-3 border-[#141414] pl-2 text-sm uppercase tracking-wider">Math Engine (Phase 1 Baseline)</h3>
+                    <h3 className="font-sans font-bold text-[#141414] border-l-3 border-[#141414] pl-2 text-sm uppercase tracking-wider">Vector Engine (Context Modifiers)</h3>
                     <p>
-                      Every entity (e.g. A, B, C) is mapped as a discrete node in a coordinate workspace. When you input a spatial premise statement:
+                      Every relationship maps as a directional vector where structural change can happen across a maximum of 4 dimensions [x, y, j, k]. When a context switch updates an axis, it registers as a linear modifier vector that is applied to the space:
                       <blockquote className="bg-[#141414]/5 rounded-none p-3 my-2 border-l-2 border-[#141414] text-[11px] font-mono whitespace-pre">
-                        A is NORTHEAST of B
+                        Context X is Before Context B (Inversion: -1)
+Context Y is After Context C (Preservation: 1)
                       </blockquote>
-                      The vector displacement engine maps:
-                      <code className="block bg-[#141414] text-[#E4E3E0] p-2.5 rounded-none font-mono text-[11px] my-2">v_A = v_B + r_Northeast</code>
-                      All starting <strong>Context Matrices</strong> are assigned standard identity equivalents (I).
                     </p>
                   </div>
 
@@ -321,8 +319,8 @@ export default function App() {
                         Adds vertical elevation. Direction vectors incorporate ABOVE / BELOW coordinate tracking as the 3rd index.
                       </div>
                       <div className="bg-white/50 p-3 rounded-none border border-[#141414]/30">
-                        <strong className="text-[#141414] block mb-0.5 font-mono uppercase tracking-tight text-[11px]">4D Hyper-Sphere [North/South, East/West, Above/Below, After/Before]</strong>
-                        The tesseract dimension! Relational reasoning incorporates <strong>AFTER</strong> ($+W$) and <strong>BEFORE</strong> ($-W$) as the 4th index.
+                        <strong className="text-[#141414] block mb-0.5 font-mono uppercase tracking-tight text-[11px]">4D Space [North/South, East/West, Above/Below, After/Before]</strong>
+                        Relational reasoning incorporates <strong>AFTER</strong> ($+W$) and <strong>BEFORE</strong> ($-W$) as the 4th index.
                       </div>
                     </div>
                   </div>
