@@ -5,22 +5,230 @@
   --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Cambria, "Times New Roman", Times, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Register the 5 theme abstractions as Tailwind utility variables */
+  --color-theme-bg: var(--main-color);
+  --color-theme-card: var(--main-color-accent);
+  --color-theme-comp: var(--main-color-complementary);
+  --color-theme-text: var(--text-color);
+  --color-theme-accent: var(--text-color-accent);
 }
+
+/* ==========================================================================
+   THEME CONFIGURATION VIA THE 5 ABSTRACTIONS
+   ========================================================================== */
+
+/* 1. DEFAULT / DARK THEME */
+body.dark,
+:root {
+  --main-color: #0f1013;                 /* 1. Main Color (App Backdrop) */
+  --main-color-accent: #191b20;          /* 2. Main Color Accent (Foreground/Cards/Panels) */
+  --main-color-complementary: #6366f1;   /* 3. Main Color Complementary (Borders/Active highlights/Triggers) */
+  --text-color: #f3f4f6;                 /* 4. Text Color (Primary text) */
+  --text-color-accent: #a5b4fc;          /* 5. Text Color Accent (Highlighted text) */
+
+  --color-theme-bg: var(--main-color);
+  --color-theme-card: var(--main-color-accent);
+  --color-theme-comp: var(--main-color-complementary);
+  --color-theme-text: var(--text-color);
+  --color-theme-accent: var(--text-color-accent);
+}
+
+/* 2. LIGHT THEME */
+body.light {
+  --main-color: #f4f5f8 !important;                 /* 1. Main Color */
+  --main-color-accent: #ffffff !important;          /* 2. Main Color Accent */
+  --main-color-complementary: #10b981 !important;   /* 3. Main Color Complementary */
+  --text-color: #111827 !important;                 /* 4. Text Color */
+  --text-color-accent: #059669 !important;          /* 5. Text Color Accent */
+
+  --color-theme-bg: var(--main-color) !important;
+  --color-theme-card: var(--main-color-accent) !important;
+  --color-theme-comp: var(--main-color-complementary) !important;
+  --color-theme-text: var(--text-color) !important;
+  --color-theme-accent: var(--text-color-accent) !important;
+}
+
+/* 3. CYAN THEME */
+body.theme-cyan {
+  --main-color: #083344 !important;                 /* 1. Main Color */
+  --main-color-accent: #0e7490 !important;          /* 2. Main Color Accent */
+  --main-color-complementary: #22d3ee !important;   /* 3. Main Color Complementary */
+  --text-color: #ecfeff !important;                 /* 4. Text Color */
+  --text-color-accent: #67e8f9 !important;          /* 5. Text Color Accent */
+
+  --color-theme-bg: var(--main-color) !important;
+  --color-theme-card: var(--main-color-accent) !important;
+  --color-theme-comp: var(--main-color-complementary) !important;
+  --color-theme-text: var(--text-color) !important;
+  --color-theme-accent: var(--text-color-accent) !important;
+}
+
+/* ==========================================================================
+   GLOBAL DESIGN INTEGRATION (OVERWRITES UNSTYLED GREYS & HARDCODED HEXES)
+   ========================================================================== */
 
 body {
-  background-color: #E4E3E0;
-  color: #141414;
+  background-color: var(--main-color) !important;
+  color: var(--text-color) !important;
+  border-color: var(--main-color-complementary) !important;
+  font-family: var(--font-sans);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-/* Custom scrollbar matching brutalist look */
+/* Custom scrollbars bound to the theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(20, 20, 20, 0.05);
+  background: var(--main-color) !important;
 }
 ::-webkit-scrollbar-thumb {
-  background: #141414;
-  border-radius: 0px;
+  background: var(--main-color-complementary) !important;
+}
+
+/* Selection style rules */
+::selection {
+  background-color: var(--main-color-complementary);
+  color: var(--main-color);
+}
+
+/* Borders are styled cleanly and dynamically by components using border-theme-comp utilities */
+
+/* Map existing hardcoded background and border classes to the 5 variables */
+
+/* 1. Application-wide backdrop elements */
+.min-h-screen,
+#root,
+.bg-\[\#E4E3E0\],
+.dark\:bg-\[\#0f0f11\],
+body.dark .min-h-screen {
+  background-color: var(--main-color) !important;
+  color: var(--text-color) !important;
+}
+
+/* 2. Foreground components (cards, panels, dropdown lists, project layouts, workspaces) */
+.bg-white,
+.bg-white\/30,
+.bg-white\/40,
+.bg-white\/50,
+.bg-white\/60,
+.bg-white\/70,
+.bg-white\/75,
+.bg-white\/80,
+.bg-[#E4E3E0]/45,
+.bg-zinc-50,
+.bg-[#141414]/5,
+.bg-zinc-900,
+.bg-zinc-950,
+.shadow-sm,
+.bg-zinc-900\/30,
+.bg-zinc-900\/50,
+.bg-zinc-900\/60,
+header,
+footer {
+  background-color: var(--main-color-accent) !important;
+  color: var(--text-color) !important;
+}
+
+/* Form structures & selectors */
+button,
+select,
+input,
+option {
+  background-color: var(--main-color-accent);
+  color: var(--text-color);
+  border-color: var(--main-color-complementary);
+}
+
+/* Buttons, inputs, active headers or state representations */
+.bg-\[\#141414\],
+.dark\:bg-zinc-200,
+.text-\[\#E4E3E0\],
+.dark\:text-\[\#141414\],
+.text-\[\#141414\] {
+  background-color: var(--main-color-accent) !important;
+  color: var(--text-color) !important;
+  border-color: var(--main-color-complementary) !important;
+}
+
+/* Hover effects or active highlights */
+.hover\:bg-\[\#141414\]\/10:hover,
+.hover\:bg-\[#141414\]\/10:hover,
+.bg-\[\#141414\]\/5,
+.hover\:bg-neutral-100:hover,
+.dark\:hover\:bg-zinc-800:hover {
+  background-color: var(--main-color-complementary) !important;
+  color: var(--main-color) !important;
+}
+
+/* Handle specific green/red success/failure indicators from the engine */
+.bg-emerald-100,
+.bg-emerald-950,
+.bg-green-600,
+.text-green-700,
+.text-emerald-900,
+.text-emerald-100,
+.border-emerald-400,
+.border-emerald-700,
+.text-red-500,
+.border-red-500 {
+  background-color: var(--main-color-accent) !important;
+  border-color: var(--main-color-complementary) !important;
+  color: var(--text-color-accent) !important;
+}
+
+/* Ensure font-mono/bold items inherit proper accented color weights */
+strong,
+code,
+pre,
+span.font-mono,
+p.font-mono {
+  color: var(--text-color-accent);
+}
+
+/* ==========================================================================
+   DYNAMIC VECTOR STYLING (SVG MATRICES)
+   ========================================================================== */
+
+svg line,
+svg path,
+svg rect,
+svg circle {
+  stroke: var(--main-color-complementary) !important;
+}
+
+/* Non-bounding fills inside visual vectors */
+svg path,
+svg rect {
+  fill: var(--main-color-accent) !important;
+}
+
+/* Coordinates labels or node descriptors in grid projections */
+svg text {
+  fill: var(--text-color) !important;
+  font-weight: bold !important;
+  font-family: var(--font-mono) !important;
+}
+
+svg text[stroke] {
+  stroke: var(--main-color) !important;
+  fill: var(--text-color-accent) !important;
+}
+
+/* Visual grid coordinates divider vectors */
+svg line[strokeOpacity="0.1"] {
+  stroke: var(--main-color-complementary) !important;
+  stroke-opacity: 0.35 !important;
+}
+
+/* Animations engine classes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

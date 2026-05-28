@@ -109,36 +109,36 @@ export default function Visualizer({
   }, [mapBPoints]);
 
   return (
-    <div className="flex flex-col flex-1 h-full bg-white/40 border border-[#141414] overflow-hidden relative">
+    <div className="flex flex-col flex-1 h-full bg-theme-card border border-theme-comp overflow-hidden relative">
       {/* Visualizer header */}
-      <div className="px-5 py-3 border-b border-[#141414] bg-[#E4E3E0] flex flex-wrap items-center justify-between gap-2">
+      <div className="px-5 py-3 border-b border-theme-comp bg-theme-bg flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Compass className="w-4 h-4" />
-          <span className="font-serif italic text-[#141414] text-sm tracking-wide">
-            Orthogonal Map Projections <span className="text-[9px] font-mono border border-[#141414] bg-white/50 px-1.5 py-0.5 ml-2 uppercase tracking-widest">{dimension}D Coordinate Space</span>
+          <Compass className="w-4 h-4 text-theme-comp" />
+          <span className="font-serif italic text-theme-text text-sm tracking-wide">
+            Orthogonal Map Projections <span className="text-[9px] font-mono border border-theme-comp bg-theme-card px-1.5 py-0.5 ml-2 uppercase tracking-widest">{dimension}D Coordinate Space</span>
           </span>
         </div>
       </div>
 
       {/* Grid Canvas Zone */}
-      <div className="flex-1 p-4 bg-white/80 shadow-inner overflow-y-auto">
+      <div className="flex-1 p-4 bg-theme-bg shadow-inner overflow-y-auto">
         {nodes.length === 0 ? (
-          <div className="h-full min-h-[300px] flex items-center justify-center p-6 text-center text-[#141414]/60 max-w-md mx-auto flex-col gap-2">
-            <Maximize2 className="w-6 h-6 stroke-[1.5]" />
+          <div className="h-full min-h-[300px] flex items-center justify-center p-6 text-center text-theme-text/60 max-w-md mx-auto flex-col gap-2">
+            <Maximize2 className="w-6 h-6 stroke-[1.5] text-theme-comp" />
             <p className="font-mono text-xs">No active logical constraints. Input entity relationships or start training to map the dimensional coordinate database.</p>
           </div>
         ) : (
           <div className={`grid gap-4 ${dimension > 2 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1 max-w-xl mx-auto'}`}>
             
             {/* Map A: North/South & East/West */}
-            <div className="flex flex-col border border-[#141414] bg-white p-3.5 relative shadow-sm">
-              <div className="text-[10px] font-mono font-bold text-[#141414] border-b border-[#141414]/15 pb-1 mb-2.5 uppercase flex justify-between items-center select-none">
+            <div className="flex flex-col border border-theme-comp bg-theme-card p-3.5 relative shadow-sm">
+              <div className="text-[10px] font-mono font-bold text-theme-text border-b border-theme-comp/20 pb-1 mb-2.5 uppercase flex justify-between items-center select-none">
                 <span className="tracking-wide">Map A: North/South & East/West Plane</span>
-                <span className="opacity-55 px-1 bg-[#E4E3E0]">X: East/West | Y: North/South</span>
+                <span className="opacity-55 px-1 bg-theme-bg text-theme-text">X: East/West | Y: North/South</span>
               </div>
               
-              <div className="flex-1 min-h-[280px] relative flex items-center justify-center bg-white/50 border border-dashed border-[#141414]/25">
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#141414 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
+              <div className="flex-1 min-h-[280px] relative flex items-center justify-center bg-theme-bg/50 border border-dashed border-theme-comp/20">
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--main-color-complementary) 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
                 <svg
                   viewBox="0 0 300 300"
                   className="w-full h-full max-h-[300px] select-none z-10"
@@ -153,7 +153,7 @@ export default function Visualizer({
                       markerHeight="5"
                       orient="auto-start-reverse"
                     >
-                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#141414" fillOpacity="0.4" />
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" fillOpacity="0.4" className="text-theme-comp" />
                     </marker>
                     <marker
                       id="arrow-mapa-highlight"
@@ -164,13 +164,13 @@ export default function Visualizer({
                       markerHeight="6"
                       orient="auto-start-reverse"
                     >
-                      <path d="M 0 0 L 10 5 L 0 10 z" fill="#141414" />
+                      <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" className="text-theme-comp" />
                     </marker>
                   </defs>
 
                   {/* Axis lines */}
-                  <line x1="150" y1="10" x2="150" y2="290" stroke="#141414" strokeOpacity="0.1" strokeDasharray="3 3" />
-                  <line x1="10" y1="150" x2="290" y2="150" stroke="#141414" strokeOpacity="0.1" strokeDasharray="3 3" />
+                  <line x1="150" y1="10" x2="150" y2="290" stroke="currentColor" strokeOpacity="0.1" strokeDasharray="3 3" className="text-theme-comp" />
+                  <line x1="10" y1="150" x2="290" y2="150" stroke="currentColor" strokeOpacity="0.1" strokeDasharray="3 3" className="text-theme-comp" />
 
                   {/* Draw premise lines */}
                   {premises.map((premise, idx) => {
@@ -191,11 +191,12 @@ export default function Visualizer({
                           y1={nodeB.scrY}
                           x2={nodeA.scrX}
                           y2={nodeA.scrY}
-                          stroke="#141414"
+                          stroke="currentColor"
                           strokeOpacity={isHighlighted ? 1 : 0.4}
                           strokeWidth={isHighlighted ? 2 : 1}
                           strokeDasharray={isHighlighted ? undefined : "3 3"}
                           markerEnd={`url(#${isHighlighted ? 'arrow-mapa-highlight' : 'arrow-mapa-default'})`}
+                          className="text-theme-comp"
                         />
                       </g>
                     );
@@ -210,21 +211,21 @@ export default function Visualizer({
                           y={point.scrY - 5}
                           width="10"
                           height="10"
-                          fill="#141414"
-                          stroke="#141414"
+                          fill="currentColor"
+                          stroke="currentColor"
                           strokeWidth="1.5"
                           transform={`rotate(45, ${point.scrX}, ${point.scrY})`}
-                          className="cursor-pointer hover:scale-125 transition-transform duration-100"
+                          className="text-theme-comp cursor-pointer hover:scale-125 transition-transform duration-100"
                         />
                         <g transform={`translate(${point.scrX}, ${point.scrY})`}>
                           <text
                             x="9"
                             y="4"
-                            fill="#ffffff"
+                            fill="var(--main-color)"
                             fontSize="9"
                             fontWeight="bold"
                             className="font-sans select-none"
-                            stroke="#ffffff"
+                            stroke="var(--main-color)"
                             strokeWidth="3.5"
                             strokeLinejoin="round"
                           >
@@ -233,22 +234,12 @@ export default function Visualizer({
                           <text
                             x="9"
                             y="4"
-                            fill="#141414"
+                            fill="var(--text-color)"
                             fontSize="9"
                             fontWeight="bold"
                             className="font-sans"
                           >
                             {point.name}
-                          </text>
-                          <text
-                            x="9"
-                            y="13"
-                            fill="#141414"
-                            fillOpacity="0.5"
-                            fontSize="7.5"
-                            className="font-mono font-bold"
-                          >
-                            [{point.coordinates[0]}, {point.coordinates[1]}]
                           </text>
                         </g>
                       </g>
@@ -260,16 +251,16 @@ export default function Visualizer({
 
             {/* Map B: Above/Below & After/Before (shown for 3D & 4D) */}
             {dimension > 2 && (
-              <div className="flex flex-col border border-[#141414] bg-white p-3.5 relative shadow-sm">
-                <div className="text-[10px] font-mono font-bold text-[#141414] border-b border-[#141414]/15 pb-1 mb-2.5 uppercase flex justify-between items-center select-none">
+              <div className="flex flex-col border border-theme-comp bg-theme-card p-3.5 relative shadow-sm">
+                <div className="text-[10px] font-mono font-bold text-theme-text border-b border-theme-comp/20 pb-1 mb-2.5 uppercase flex justify-between items-center select-none">
                   <span className="tracking-wide">Map B: Above/Below & After/Before Plane</span>
-                  <span className="opacity-55 px-1 bg-[#E4E3E0] font-mono">
+                  <span className="opacity-55 px-1 bg-theme-bg font-mono text-theme-text">
                     {dimension === 3 ? 'X: (N/A) | Y: Above/Below' : 'X: After/Before | Y: Above/Below'}
                   </span>
                 </div>
                 
-                <div className="flex-1 min-h-[280px] relative flex items-center justify-center bg-white/50 border border-dashed border-[#141414]/25">
-                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#141414 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
+                <div className="flex-1 min-h-[280px] relative flex items-center justify-center bg-theme-bg/50 border border-dashed border-theme-comp/20">
+                  <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(var(--main-color-complementary) 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
                   <svg
                     viewBox="0 0 300 300"
                     className="w-full h-full max-h-[300px] select-none z-10"
@@ -284,7 +275,7 @@ export default function Visualizer({
                         markerHeight="5"
                         orient="auto-start-reverse"
                       >
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#141414" fillOpacity="0.4" />
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" fillOpacity="0.4" className="text-theme-comp" />
                       </marker>
                       <marker
                         id="arrow-mapb-highlight"
@@ -295,13 +286,13 @@ export default function Visualizer({
                         markerHeight="6"
                         orient="auto-start-reverse"
                       >
-                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#141414" />
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" className="text-theme-comp" />
                       </marker>
                     </defs>
 
                     {/* Axis lines */}
-                    <line x1="150" y1="10" x2="150" y2="290" stroke="#141414" strokeOpacity="0.1" strokeDasharray="3 3" />
-                    <line x1="10" y1="150" x2="290" y2="150" stroke="#141414" strokeOpacity="0.1" strokeDasharray="3 3" />
+                    <line x1="150" y1="10" x2="150" y2="290" stroke="currentColor" strokeOpacity="0.1" strokeDasharray="3 3" className="text-theme-comp" />
+                    <line x1="10" y1="150" x2="290" y2="150" stroke="currentColor" strokeOpacity="0.1" strokeDasharray="3 3" className="text-theme-comp" />
 
                     {/* Draw premise lines */}
                     {premises.map((premise, idx) => {
@@ -322,11 +313,12 @@ export default function Visualizer({
                             y1={nodeB.scrY}
                             x2={nodeA.scrX}
                             y2={nodeA.scrY}
-                            stroke="#141414"
+                            stroke="currentColor"
                             strokeOpacity={isHighlighted ? 1 : 0.4}
                             strokeWidth={isHighlighted ? 2 : 1}
                             strokeDasharray={isHighlighted ? undefined : "3 3"}
                             markerEnd={`url(#${isHighlighted ? 'arrow-mapb-highlight' : 'arrow-mapb-default'})`}
+                            className="text-theme-comp"
                           />
                         </g>
                       );
@@ -345,21 +337,21 @@ export default function Visualizer({
                             y={point.scrY - 5}
                             width="10"
                             height="10"
-                            fill={hasActiveW ? "none" : "#141414"}
-                            stroke="#141414"
+                            fill={hasActiveW ? "none" : "currentColor"}
+                            stroke="currentColor"
                             strokeWidth="1.5"
                             transform={`rotate(45, ${point.scrX}, ${point.scrY})`}
-                            className="cursor-pointer hover:scale-125 transition-transform duration-100"
+                            className="text-theme-comp cursor-pointer hover:scale-125 transition-transform duration-100"
                           />
                           <g transform={`translate(${point.scrX}, ${point.scrY})`}>
                             <text
                               x="9"
                               y="4"
-                              fill="#ffffff"
+                              fill="var(--main-color)"
                               fontSize="9"
                               fontWeight="bold"
                               className="font-sans select-none"
-                              stroke="#ffffff"
+                              stroke="var(--main-color)"
                               strokeWidth="3.5"
                               strokeLinejoin="round"
                             >
@@ -368,22 +360,12 @@ export default function Visualizer({
                             <text
                               x="9"
                               y="4"
-                              fill="#141414"
+                              fill="var(--text-color)"
                               fontSize="9"
                               fontWeight="bold"
                               className="font-sans"
                             >
                               {point.name}
-                            </text>
-                            <text
-                              x="9"
-                              y="13"
-                              fill="#141414"
-                              fillOpacity="0.5"
-                              fontSize="7.5"
-                              className="font-mono font-bold"
-                            >
-                              [{point.coordinates[2] ?? 0}, {point.coordinates[3] ?? 0}]
                             </text>
                           </g>
                         </g>
@@ -399,8 +381,8 @@ export default function Visualizer({
       </div>
 
       {/* Guide Info Overlay Panel */}
-      <div className="px-5 py-3.5 border-t border-[#141414] bg-[#E4E3E0] text-[10px] text-[#141414] leading-normal font-mono select-none flex items-start gap-2">
-        <Move className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+      <div className="px-5 py-3.5 border-t border-theme-comp bg-theme-bg text-[10px] text-theme-text leading-normal font-mono select-none flex items-start gap-2">
+        <Move className="w-3.5 h-3.5 shrink-0 mt-0.5 text-theme-comp" />
         <p>
           {dimension === 2
             ? "Two-dimensional Cartesian configuration mapped in Map A. Initial spatial matrix verified."

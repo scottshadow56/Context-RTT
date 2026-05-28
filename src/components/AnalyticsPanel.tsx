@@ -113,6 +113,15 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
     });
   }, [iqHistoryPoints]);
 
+  // Sum of all training time spent (daily tracking)
+  const dailyTimeSpentText = useMemo(() => {
+    const totalDurationMs = stats.history.reduce((acc, curr) => acc + (curr.timeMs || 0), 0);
+    const totalMinutes = Math.floor(totalDurationMs / 60000);
+    const totalSeconds = Math.floor((totalDurationMs % 60000) / 1000);
+    if (totalMinutes === 0 && totalSeconds === 0) return '0s';
+    return totalMinutes > 0 ? `${totalMinutes}m ${totalSeconds}s` : `${totalSeconds}s`;
+  }, [stats.history]);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6" id="analytics-panel-root">
       
@@ -120,23 +129,23 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
       <div className="lg:col-span-8 flex flex-col gap-6">
         
         {/* IQ Progress Line graph charting custom */}
-        <div className="bg-white/40 border border-[#141414] p-5 shadow-sm rounded-none flex flex-col">
-          <div className="flex flex-wrap justify-between items-center gap-1.5 mb-3 border-b border-[#141414]/15 pb-2">
+        <div className="bg-theme-card border border-theme-comp p-5 shadow-sm rounded-none flex flex-col">
+          <div className="flex flex-wrap justify-between items-center gap-1.5 mb-3 border-b border-theme-comp/20 pb-2">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#141414]" />
-              <h3 className="font-mono font-bold text-[#141414] text-xs uppercase tracking-wider">
+              <TrendingUp className="w-4 h-4 text-theme-comp" />
+              <h3 className="font-mono font-bold text-theme-text text-xs uppercase tracking-wider">
                 Fluid IQ Cognitive Mapping Progress
               </h3>
             </div>
-            <span className="font-mono text-[9px] text-[#141414] border border-[#141414]/45 px-2 py-0.5 bg-white font-bold uppercase">
+            <span className="font-mono text-[9px] text-theme-text border border-theme-comp px-2 py-0.5 bg-theme-bg font-bold uppercase">
               Chronological Scale (IQ 100 - 160)
             </span>
           </div>
 
-          <div className="flex-1 min-h-[200px] flex items-center justify-center bg-white/60 border border-[#141414]/35 p-3 relative rounded-none">
+          <div className="flex-1 min-h-[200px] flex items-center justify-center border p-3 relative rounded-none" style={{ color: 'var(--text-color)', backgroundColor: 'var(--main-color-accent)', borderColor: 'var(--main-color-complementary)' }}>
             {stats.history.length === 0 ? (
-              <div className="text-center text-[#141414]/60 max-w-xs text-xs font-mono p-6 leading-relaxed flex flex-col items-center gap-2">
-                <Milestone className="w-6 h-6" />
+              <div className="text-center text-theme-text/60 max-w-xs text-xs font-mono p-6 leading-relaxed flex flex-col items-center gap-2">
+                <Milestone className="w-6 h-6 text-theme-comp" />
                 <p>Telemetry graph locked. Perfect at least one multidimensional spatial reasoning problem in the workspace to construct dynamic fluid projections.</p>
               </div>
             ) : (
@@ -159,7 +168,7 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
                           y1={yPos}
                           x2="480"
                           y2={yPos}
-                          stroke="#141414"
+                          stroke="var(--main-color-complementary)"
                           strokeOpacity={0.15}
                           strokeWidth="1.2"
                           strokeDasharray="3 3"
@@ -168,7 +177,7 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
                         <text
                           x="38"
                           y={yPos + 3}
-                          fill="#141414"
+                          fill="var(--text-color)"
                           fillOpacity={0.7}
                           fontSize="9"
                           textAnchor="end"
@@ -189,7 +198,7 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
                           return acc + `${idx === 0 ? 'M' : 'L'} ${curr.x} ${curr.y} `;
                         }, '')}
                         fill="none"
-                        stroke="#141414"
+                        stroke="var(--main-color-complementary)"
                         strokeWidth="2.5"
                         strokeLinecap="square"
                         strokeLinejoin="miter"
@@ -199,12 +208,12 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
                       <path
                         d={
                           chartCoordinates.reduce((acc, curr, idx) => {
-                            return acc + `${idx === 0 ? 'M' : 'L'} ${curr.x} ${curr.y} `;
+                             return acc + `${idx === 0 ? 'M' : 'L'} ${curr.x} ${curr.y} `;
                           }, '') + 
                           `L ${chartCoordinates[chartCoordinates.length - 1].x} ${155} ` +
                           `L ${chartCoordinates[0].x} ${155} Z`
                         }
-                        fill="#141414"
+                        fill="var(--main-color-complementary)"
                         opacity="0.05"
                       />
 
@@ -215,15 +224,15 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
                             cx={pt.x}
                             cy={pt.y}
                             r="4.5"
-                            fill="#E4E3E0"
-                            stroke="#141414"
+                            fill="var(--main-color-accent)"
+                            stroke="var(--main-color-complementary)"
                             strokeWidth="2"
                             className="transition-transform duration-100 hover:scale-150 cursor-crosshair"
                           />
                           <text
                             x={pt.x}
                             y={pt.y - 9}
-                            fill="#141414"
+                            fill="var(--text-color)"
                             fontSize="9"
                             fontWeight="bold"
                             textAnchor="middle"
@@ -235,7 +244,7 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
                           <text
                             x={pt.x}
                             y="172"
-                            fill="#141414"
+                            fill="var(--text-color)"
                             fillOpacity="0.6"
                             fontSize="8"
                             textAnchor="middle"
@@ -254,10 +263,10 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
         </div>
 
         {/* Level metrics bar stats */}
-        <div className="bg-white/40 border border-[#141414] p-5 shadow-sm rounded-none flex flex-col">
-          <div className="flex items-center gap-2 mb-4 border-b border-[#141414]/15 pb-2">
-            <Compass className="w-4 h-4 text-[#141414]" />
-            <h3 className="font-mono font-bold text-[#141414] text-xs uppercase tracking-wider">
+        <div className="bg-theme-card border border-theme-comp p-5 shadow-sm rounded-none flex flex-col">
+          <div className="flex items-center gap-2 mb-4 border-b border-theme-comp/20 pb-2">
+            <Compass className="w-4 h-4 text-theme-comp" />
+            <h3 className="font-mono font-bold text-theme-text text-xs uppercase tracking-wider">
               Cognitive Performance by Dimensional Space
             </h3>
           </div>
@@ -275,16 +284,16 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
               }
 
               return (
-                <div key={dim} className="flex flex-col gap-1.5 p-3 bg-white/70 border border-[#141414]/30">
+                <div key={dim} className="flex flex-col gap-1.5 p-3 bg-theme-card border border-theme-comp/30">
                   <div className="flex justify-between items-center text-xs flex-wrap gap-1">
-                    <span className="font-mono font-bold text-[#141414]">{dimTitle}</span>
-                    <span className="font-mono text-[#141414] font-bold bg-[#E4E3E0] border border-[#141414]/30 px-2 py-0.5 text-[10px]">
-                      Accuracy: <span className={correct > 0 ? 'text-[#141414]' : 'text-[#111111]/50'}>{accPercent}%</span> ({correct}/{total})
+                    <span className="font-mono font-bold text-theme-text">{dimTitle}</span>
+                    <span className="font-mono text-theme-text font-bold bg-theme-bg border border-theme-comp/30 px-2 py-0.5 text-[10px]">
+                      Accuracy: <span className={correct > 0 ? 'text-theme-text' : 'text-theme-text/50'}>{accPercent}%</span> ({correct}/{total})
                     </span>
                   </div>
-                  <div className="w-full bg-[#E4E3E0] h-2.5 overflow-hidden border border-[#141414]/40 relative">
+                  <div className="w-full bg-theme-bg h-2.5 overflow-hidden border border-theme-comp/40 relative">
                     <div
-                      className="h-full bg-[#141414] transition-all duration-300"
+                      className="h-full bg-theme-comp transition-all duration-300"
                       style={{ width: `${accPercent}%` }}
                     />
                   </div>
@@ -300,17 +309,17 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
       <div className="lg:col-span-4 flex flex-col gap-6">
         
         {/* Est IQ score block */}
-        <div className="bg-white border-2 border-[#141414] p-5 shadow-none flex flex-col items-center justify-center text-center relative overflow-hidden rounded-none">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#141414]/5 rotate-45 pointer-events-none"></div>
+        <div className="bg-theme-card border-2 border-theme-comp p-5 shadow-none flex flex-col items-center justify-center text-center relative overflow-hidden rounded-none text-theme-text transition-colors">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-theme-comp/5 rotate-45 pointer-events-none"></div>
           
-          <Trophy className="w-8 h-8 text-[#141414] mb-2" />
-          <span className="text-[9px] font-mono font-bold tracking-widest text-[#141414] uppercase">Estimated Core Fluid IQ</span>
+          <Trophy className="w-8 h-8 text-theme-comp mb-2" />
+          <span className="text-[9px] font-mono font-bold tracking-widest uppercase text-theme-accent">Estimated Core Fluid IQ</span>
           
-          <div className="text-4xl font-mono font-black text-[#141414] mt-1 mb-1 tracking-tighter border-b-2 border-dashed border-[#141414] pb-0.5">
+          <div className="text-4xl font-mono font-black mt-1 mb-1 tracking-tighter border-b-2 border-dashed border-theme-comp pb-0.5">
             {calculatedIQ}
           </div>
 
-          <div className="text-[10px] font-mono text-[#141414]/80 leading-normal max-w-[210px] bg-[#E4E3E0] p-2 mt-2 border border-[#141414] uppercase">
+          <div className="text-[10px] font-mono leading-normal max-w-[210px] bg-theme-bg p-2 mt-2 border border-theme-comp uppercase text-theme-text">
             {calculatedIQ === 100 
               ? "Baseline relational capability unlocked. Work through Advanced or Master problems to accelerate fluid scores."
               : calculatedIQ < 115 
@@ -322,64 +331,53 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
           </div>
         </div>
 
-        {/* Numerical KPIs grid */}
-        <div className="bg-white/40 border border-[#141414] p-4 shadow-sm grid grid-cols-2 gap-3.5 rounded-none">
-          <div className="bg-white p-3 border border-[#141414] flex flex-col gap-1 rounded-none font-mono">
-            <span className="text-[8px] text-[#141414]/65 font-bold tracking-wide uppercase">Accuracy Score</span>
-            <span className="text-xl font-black text-[#141414]">{stats.accuracy}%</span>
-            <span className="text-[9px] font-sans text-[#141414]/60">({stats.totalCorrect} / {stats.totalAnswered} Correct)</span>
+        {/* Numerical KPIs grid (Only Tracks Inferences Made thus far and Daily Durations) */}
+        <div className="bg-theme-card/40 border border-theme-comp p-4 shadow-sm grid grid-cols-2 gap-3.5 rounded-none text-theme-text">
+          <div className="bg-theme-card p-3.5 border border-theme-comp flex flex-col gap-1 rounded-none font-mono">
+            <span className="text-[8px] text-theme-text/65 font-bold tracking-wide uppercase">Inferences Made</span>
+            <span className="text-xl font-black text-theme-text">{stats.totalCorrect}</span>
+            <span className="text-[9px] font-sans text-theme-text/80">({stats.totalAnswered} deduction attempt{stats.totalAnswered !== 1 ? 's' : ''})</span>
           </div>
 
-          <div className="bg-white p-3 border border-[#141414] flex flex-col gap-1 rounded-none font-mono">
-            <span className="text-[8px] text-[#141414]/65 font-bold tracking-wide uppercase">Active Streak</span>
-            <span className="text-xl font-black text-[#141414] flex items-center gap-1">
-              <Zap className="w-4 h-4 fill-[#141414]" />
-              {stats.streak}
-            </span>
-            <span className="text-[9px] font-sans text-[#141414]/60">Current Correct Loop</span>
-          </div>
-
-          <div className="bg-white p-3 border border-[#141414] flex flex-col gap-1 col-span-2 rounded-none font-mono">
-            <span className="text-[8px] text-[#141414]/65 font-bold tracking-wide uppercase">Processing Reaction Time</span>
-            <span className="text-lg font-black text-[#141414]">
-              {stats.averageTimeMs > 0 ? `${(stats.averageTimeMs / 1000).toFixed(1)}s` : '0.0s'}
-            </span>
-            <span className="text-[9px] font-sans text-[#141414]/60">Average deductive logic resolve rate</span>
+          <div className="bg-theme-card p-3.5 border border-theme-comp flex flex-col gap-1 rounded-none font-mono">
+            <span className="text-[8px] text-theme-text/65 font-bold tracking-wide uppercase">Daily Training Time</span>
+            <span className="text-xl font-black text-theme-text">{dailyTimeSpentText}</span>
+            <span className="text-[9px] font-sans text-theme-text/80">Parietal relational workload</span>
           </div>
         </div>
 
         {/* Historical entries log sidebar list */}
-        <div className="bg-white/40 border border-[#141414] p-5 shadow-sm flex flex-col h-[230px] rounded-none">
-          <div className="flex items-center gap-2 border-b border-[#141414] pb-2 mb-3 shrink-0">
-            <History className="w-4 h-4 text-[#141414]" />
-            <h4 className="font-mono font-bold text-[#141414] text-xs uppercase tracking-wider">
+        <div className="bg-theme-card/40 border border-theme-comp p-5 shadow-sm flex flex-col h-[230px] rounded-none text-theme-text">
+          <div className="flex items-center gap-2 border-b border-theme-comp/30 pb-2 mb-3 shrink-0">
+            <History className="w-4 h-4 text-theme-comp" />
+            <h4 className="font-mono font-bold text-theme-text text-xs uppercase tracking-wider">
               Training Log Telemetry
             </h4>
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-2 pr-1 select-none">
             {stats.history.length === 0 ? (
-              <p className="text-center text-[10px] text-[#141414]/60 font-mono italic pt-6">No historical records available.</p>
+               <p className="text-center text-[10px] text-theme-text/60 font-mono italic pt-6">No historical records available.</p>
             ) : (
               stats.history.map((h, hIdx) => (
                 <div
                   key={hIdx}
-                  className="bg-white hover:bg-white/90 border border-[#141414]/40 px-3 py-2 flex items-center justify-between transition-all rounded-none"
+                  className="bg-theme-card hover:bg-theme-card/90 border border-theme-comp/40 px-3 py-2 flex items-center justify-between transition-all rounded-none"
                 >
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-[10px] font-mono text-[#141414] font-bold uppercase tracking-tight">
+                    <span className="text-[10px] font-mono text-theme-text font-bold uppercase tracking-tight">
                       {h.dimension}D SPACE - <span className="font-black underline">{h.difficulty}</span>
                     </span>
-                    <span className="text-[9px] font-mono text-[#141414]/60">Time: {((h.timeMs || 0) / 1000).toFixed(1)}s</span>
+                    <span className="text-[9px] font-mono text-theme-text/60">Time: {((h.timeMs || 0) / 1000).toFixed(1)}s</span>
                   </div>
                   <div className="flex flex-col items-end gap-0.5">
                     <span className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 border ${
-                      h.correct ? 'text-black bg-[#E4E3E0] border-[#141414]' : 'text-red-700 bg-red-50 border-red-500'
+                      h.correct ? 'text-theme-text bg-theme-bg border-theme-comp' : 'text-red-500 bg-theme-card border-red-500'
                     }`}>
                       {h.correct ? 'COMPLIANT' : 'DIVERGED'}
                     </span>
                     {h.correct && h.scoreGained > 0 && (
-                      <span className="text-[9px] font-mono text-[#141414] font-bold">+{h.scoreGained} pts</span>
+                      <span className="text-[9px] font-mono text-theme-text font-bold">+{h.scoreGained} pts</span>
                     )}
                   </div>
                 </div>
@@ -391,7 +389,7 @@ export default function AnalyticsPanel({ stats, onResetStats }: AnalyticsPanelPr
             <button
               id="reset-telemetry-btn"
               onClick={onResetStats}
-              className="mt-3 text-[9px] font-mono text-[#141414]/60 hover:text-[#141414] text-center uppercase tracking-wider block font-bold cursor-pointer"
+              className="mt-3 text-[9px] font-mono text-theme-text/60 hover:text-theme-text text-center uppercase tracking-wider block font-bold cursor-pointer"
             >
               Flush Cognitive Logs
             </button>

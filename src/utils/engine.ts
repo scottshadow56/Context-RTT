@@ -247,31 +247,56 @@ export function describeVector(vector: Vector, basisRelations: Record<string, Ve
 
   // Multi-dimensional breakdown descriptive text
   const parts: string[] = [];
-  const dimNames = ['NORTH/SOUTH', 'EAST/WEST', 'ABOVE/BELOW', 'AFTER/BEFORE'];
   
   vector.forEach((val, idx) => {
     if (val === 0) return;
     
+    let directionStr = '';
     if (idx === 0) {
-      parts.push(val > 0 ? `${val} NORTH` : `${Math.abs(val)} SOUTH`);
+      directionStr = val > 0 ? 'NORTH' : 'SOUTH';
     } else if (idx === 1) {
-      parts.push(val > 0 ? `${val} EAST` : `${Math.abs(val)} WEST`);
+      directionStr = val > 0 ? 'EAST' : 'WEST';
     } else if (idx === 2) {
-      parts.push(val > 0 ? `${val} ABOVE` : `${Math.abs(val)} BELOW`);
+      directionStr = val > 0 ? 'ABOVE' : 'BELOW';
     } else if (idx === 3) {
-      parts.push(val > 0 ? `${val} AFTER` : `${Math.abs(val)} BEFORE`);
+      directionStr = val > 0 ? 'AFTER' : 'BEFORE';
     } else {
-      parts.push(`${val} in Dim ${idx + 1}`);
+      directionStr = `Dim ${idx + 1}`;
+    }
+
+    if (Math.abs(val) !== 1) {
+      parts.push(`${directionStr}-scaled`);
+    } else {
+      parts.push(directionStr);
     }
   });
 
   return parts.length > 0 ? parts.join(', ') : 'COINCIDENT (Same Position)';
 }
 
+export function generateCVC(): string {
+  const consonants = 'BCDFGHJKLMNPQRSTVWXYZ';
+  const vowels = 'AEIOU';
+  const c1 = consonants[Math.floor(Math.random() * consonants.length)];
+  const v = vowels[Math.floor(Math.random() * vowels.length)];
+  const c2 = consonants[Math.floor(Math.random() * consonants.length)];
+  return c1 + v + c2;
+}
+
+export function generateUniqueCVCNames(count: number): string[] {
+  const names = new Set<string>();
+  while (names.size < count) {
+    names.add(generateCVC());
+  }
+  return Array.from(names);
+}
+
 // Generate relational logical training riddle
 export function generateTrainerPuzzle(
   dimension: DimensionCount,
-  difficulty: PuzzleDifficulty
+  difficulty: PuzzleDifficulty,
+  customNodeCount?: number,
+  customScramble?: 'none' | 'partial' | 'full'
 ): Puzzle {
   const basis = getBasisRelations(dimension);
   const basisKeys = Object.keys(basis).filter(k => {
@@ -283,19 +308,18 @@ export function generateTrainerPuzzle(
     return true;
   });
 
-  // Pick entity names
-  const potentialNames = [
-    'Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon', 'Zeta', 'Eta', 'Theta',
-    'Iota', 'Kappa', 'Lambda', 'Mu', 'Sigma', 'Omega'
-  ];
-
-  // Number of nodes based on difficulty
+  // Number of nodes based on difficulty, or overridden by customNodeCount
   let nodeCount = 3;
-  if (difficulty === 'Intermediate') nodeCount = 4;
-  else if (difficulty === 'Advanced') nodeCount = 5;
-  else if (difficulty === 'Master') nodeCount = 6;
+  if (customNodeCount !== undefined && customNodeCount > 0) {
+    nodeCount = customNodeCount;
+  } else {
+    if (difficulty === 'Intermediate') nodeCount = 4;
+    else if (difficulty === 'Advanced') nodeCount = 5;
+    else if (difficulty === 'Master') nodeCount = 6;
+  }
 
-  const selectedNames = potentialNames.slice(0, nodeCount);
+  // Pick unique CVC entity names randomly
+  const selectedNames = generateUniqueCVCNames(nodeCount);
   
   // Create a coordinates grid starting at origin for node 0
   const nodesCoords: Record<string, Vector> = {};
@@ -343,18 +367,33 @@ export function generateTrainerPuzzle(
     connected.push(child);
   }
 
-  // Shuffle premises to increase working memory load (not linear sequence)
-  const shuffledPremises = [...premises].sort(() => Math.random() - 0.5);
+  // Shuffle/scramble premises to increase working memory load (not linear sequence)
+  const shuffledPremises = [...premises];
+  const scramble = customScramble ?? 'full';
+  if (scramble === 'full') {
+    shuffledPremises.sort(() => Math.random() - 0.5);
+  } else if (scramble === 'partial') {
+    if (Math.random() < 0.4) {
+      shuffledPremises.sort(() => Math.random() - 0.5);
+    } else if (shuffledPremises.length >= 2) {
+      const temp = shuffledPremises[0];
+      shuffledPremises[0] = shuffledPremises[1];
+      shuffledPremises[1] = temp;
+    }
+  } else {
+    // none: leave them in natural logical generation order
+  }
 
-  // Add a redundant or checking constraint sometimes for higher difficulties
-  // to make it interesting, but for puzzles we need to query relationship between 2 far away nodes.
-  // Find two nodes that are not directly mapped in the basic tree
-  let bestA = selectedNames[0];
-  let bestB = selectedNames[nodeCount - 1];
+  // Randomly choose the two distinct items in the conclusion, not just first and last elements (Alpha and Delta)
+  let idxA = Math.floor(Math.random() * selectedNames.length);
+  let idxB = Math.floor(Math.random() * selectedNames.length);
+  while (idxA === idxB) {
+    idxB = Math.floor(Math.random() * selectedNames.length);
+  }
+  const bestA = selectedNames[idxA];
+  const bestB = selectedNames[idxB];
 
-  // Calculate distance or path length, but let's just make sure they are distinct
-  // We want to ask: "Determine relationship of bestA with respect to bestB"
-  // means: what vector do we add to bestB to get bestA? => bestA_coords - bestB_coords
+  // Calculate coordinates distance or path vector
   const targetVector = vecSub(nodesCoords[bestA], nodesCoords[bestB]);
 
   // Render a human descriptive answer for the correct relationship
