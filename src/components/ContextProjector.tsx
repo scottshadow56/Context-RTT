@@ -23,6 +23,8 @@ interface ContextProjectorProps {
     shiftMultiplier: number; 
     shiftLabel: string; 
   }[];
+  queryNode?: string;
+  queryTarget?: string;
 }
 
 export default function ContextProjector({
@@ -33,7 +35,9 @@ export default function ContextProjector({
   projectedRelationName,
   activeModifiers,
   nodeDefinitions = [],
-  contextVehicles = []
+  contextVehicles = [],
+  queryNode = '',
+  queryTarget = ''
 }: ContextProjectorProps) {
   // Toggle between Node Workspace projections and Context Shift Space vectors
   const [projectorTab, setProjectorTab] = useState<'nodes' | 'context'>('nodes');
@@ -44,73 +48,105 @@ export default function ContextProjector({
     return `${val}x`;
   };
 
-  // 1. Calculate and map Node coordinates in Real Space (Gamma, Beta, Alpha, Delta)
+  // 1. Calculate and map Node coordinates in Real Space using topological solver
   const computedNodes = useMemo(() => {
-    const Gamma = [0, 0, 0, 0];
-    let Beta = [1, 0, 0, 0];
-    let AlphaOffset = [0, 1, 0, 0];
-    let DeltaOffset = [0, 0, 1, 0];
+    const base: Record<string, number[]> = {};
+    const projected: Record<string, number[]> = {};
+    const labels: Record<string, string> = {};
 
-    let GammaName = 'Gamma';
-    let BetaName = 'Beta';
-    let AlphaName = 'Alpha';
-    let DeltaName = 'Delta';
-    let OmegaName = 'Omega';
+    if (!nodeDefinitions || nodeDefinitions.length === 0) {
+      // Fallback defaults if no definitions are loaded yet
+      base['Gamma'] = [0, 0, 0, 0];
+      base['Beta'] = [1, 0, 0, 0];
+      base['Alpha'] = [1, 1, 0, 0];
+      base['Delta'] = [0, 0, 1, 0];
 
-    // Read generated values if available
-    if (nodeDefinitions && nodeDefinitions.length > 0) {
-      const bDef = nodeDefinitions[0];
-      const aDef = nodeDefinitions[1];
-      const dDef = nodeDefinitions[2];
-      const oDef = nodeDefinitions[3];
-      if (bDef) {
-        GammaName = bDef.targetNode;
-        BetaName = bDef.node;
-        Beta = bDef.baseOffset;
+      projected['Gamma'] = [0, 0, 0, 0];
+      projected['Beta'] = [1 * (activeModifiers[0] ?? 1), 0, 0, 0];
+      projected['Alpha'] = [1 * (activeModifiers[0] ?? 1), 1 * (activeModifiers[1] ?? 1), 0, 0];
+      projected['Delta'] = [0, 0, 1 * (activeModifiers[2] ?? 1), 0];
+
+      labels['Gamma'] = 'Gamma';
+      labels['Beta'] = 'Beta';
+      labels['Alpha'] = 'Alpha';
+      labels['Delta'] = 'Delta';
+
+      return { base, projected, labels };
+    }
+
+    // Solve for base coordinates starting from root
+    const resolvedCoords: Record<string, number[]> = {};
+    let rootNode: string | null = null;
+    
+    const allNodes = new Set(nodeDefinitions.map(d => d.node));
+    const allTargetNodes = new Set(nodeDefinitions.map(d => d.targetNode));
+    for (const t of allTargetNodes) {
+      if (!allNodes.has(t)) {
+        rootNode = t;
+        break;
       }
-      if (aDef) {
-        AlphaName = aDef.node;
-        AlphaOffset = aDef.baseOffset;
+    }
+    if (!rootNode) {
+      rootNode = nodeDefinitions[0].targetNode;
+    }
+
+    resolvedCoords[rootNode] = [0, 0, 0, 0];
+
+    let changed = true;
+    let iterations = 0;
+    while (changed && iterations < 100) {
+      changed = false;
+      iterations++;
+      for (const def of nodeDefinitions) {
+        const u = def.node;
+        const v = def.targetNode;
+        const offset = def.baseOffset || [0, 0, 0, 0];
+        
+        if (resolvedCoords[v] !== undefined && resolvedCoords[u] === undefined) {
+          resolvedCoords[u] = [
+            resolvedCoords[v][0] + (offset[0] ?? 0),
+            resolvedCoords[v][1] + (offset[1] ?? 0),
+            resolvedCoords[v][2] + (offset[2] ?? 0),
+            resolvedCoords[v][3] + (offset[3] ?? 0),
+          ];
+          changed = true;
+        } else if (resolvedCoords[u] !== undefined && resolvedCoords[v] === undefined) {
+          resolvedCoords[v] = [
+            resolvedCoords[u][0] - (offset[0] ?? 0),
+            resolvedCoords[u][1] - (offset[1] ?? 0),
+            resolvedCoords[u][2] - (offset[2] ?? 0),
+            resolvedCoords[u][3] - (offset[3] ?? 0),
+          ];
+          changed = true;
+        }
       }
-      if (dDef) {
-        DeltaName = dDef.node;
-        DeltaOffset = dDef.baseOffset;
-      }
-      if (oDef) {
-        OmegaName = oDef.node;
+      if (!changed) {
+        const unresolved = nodeDefinitions.find(def => resolvedCoords[def.node] === undefined && resolvedCoords[def.targetNode] === undefined);
+        if (unresolved) {
+          resolvedCoords[unresolved.targetNode] = [0, 0, 0, 0];
+          changed = true;
+        }
       }
     }
 
-    const Alpha = [
-      Beta[0] + AlphaOffset[0],
-      Beta[1] + AlphaOffset[1],
-      Beta[2] + AlphaOffset[2],
-      Beta[3] + AlphaOffset[3],
-    ];
-    const Delta = [...DeltaOffset];
-
+    // Map base, projected and labels
     const S_y = activeModifiers[0] ?? 1;
     const S_x = activeModifiers[1] ?? 1;
     const S_z = activeModifiers[2] ?? 1;
     const S_w = activeModifiers[3] ?? 1;
 
-    // Projected counterparts
-    const GammaProj = [0, 0, 0, 0];
-    const BetaProj = [Beta[0] * S_y, Beta[1] * S_x, Beta[2] * S_z, Beta[3] * S_w];
-    const AlphaProj = [Alpha[0] * S_y, Alpha[1] * S_x, Alpha[2] * S_z, Alpha[3] * S_w];
-    const DeltaProj = [Delta[0] * S_y, Delta[1] * S_x, Delta[2] * S_z, Delta[3] * S_w];
+    for (const [nodeName, coord] of Object.entries(resolvedCoords)) {
+      base[nodeName] = coord;
+      projected[nodeName] = [
+        coord[0] * S_y,
+        coord[1] * S_x,
+        coord[2] * S_z,
+        coord[3] * S_w
+      ];
+      labels[nodeName] = nodeName;
+    }
 
-    return {
-      base: { Gamma, Beta, Alpha, Delta },
-      projected: { Gamma: GammaProj, Beta: BetaProj, Alpha: AlphaProj, Delta: DeltaProj },
-      labels: {
-        Gamma: GammaName,
-        Beta: BetaName,
-        Alpha: AlphaName,
-        Delta: DeltaName,
-        Omega: OmegaName
-      }
-    };
+    return { base, projected, labels };
   }, [nodeDefinitions, activeModifiers]);
 
   // 2. Map Context Variables into 4D Context Vectors space abstractly
@@ -146,7 +182,7 @@ export default function ContextProjector({
   // Dynamic Scale and Translation for Grid One [x, y] - Node Space
   const nodeScaleA = useMemo(() => {
     const { base, projected } = computedNodes;
-    const pts = [base.Gamma, base.Beta, base.Alpha, base.Delta, projected.Gamma, projected.Beta, projected.Alpha, projected.Delta];
+    const pts = [...Object.values(base), ...Object.values(projected)];
     const xs = pts.map(p => p[1]);
     const ys = pts.map(p => p[0]);
     const minX = Math.min(...xs, -1);
@@ -161,7 +197,7 @@ export default function ContextProjector({
   // Dynamic Scale and Translation for Grid Two [z, w] - Node Space
   const nodeScaleB = useMemo(() => {
     const { base, projected } = computedNodes;
-    const pts = [base.Gamma, base.Beta, base.Alpha, base.Delta, projected.Gamma, projected.Beta, projected.Alpha, projected.Delta];
+    const pts = [...Object.values(base), ...Object.values(projected)];
     const zs = pts.map(p => p[2]);
     const ws = pts.map(p => p[3]);
     const minZ = Math.min(...zs, -1);
@@ -306,19 +342,39 @@ export default function ContextProjector({
 
                       return (
                         <>
-                          {/* 1. Base Relations Path: Gamma -> Beta -> Alpha and Gamma -> Delta */}
-                          {drawLink(tX(base.Gamma[1]), tY(base.Gamma[0]), tX(base.Beta[1]), tY(base.Beta[0]), false)}
-                          {drawLink(tX(base.Beta[1]), tY(base.Beta[0]), tX(base.Alpha[1]), tY(base.Alpha[0]), false)}
-                          {drawLink(tX(base.Gamma[1]), tY(base.Gamma[0]), tX(base.Delta[1]), tY(base.Delta[0]), false)}
-                          {/* Target relation (Delta -> Alpha) */}
-                          {drawLink(tX(base.Delta[1]), tY(base.Delta[0]), tX(base.Alpha[1]), tY(base.Alpha[0]), false, true)}
+                          {/* 1. Base Relations Path: Dynamic from nodeDefinitions */}
+                          {nodeDefinitions.map((def, i) => {
+                            const parentCoord = base[def.targetNode];
+                            const childCoord = base[def.node];
+                            if (!parentCoord || !childCoord) return null;
+                            return (
+                              <g key={`baselink-${i}`}>
+                                {drawLink(tX(parentCoord[1]), tY(parentCoord[0]), tX(childCoord[1]), tY(childCoord[0]), false)}
+                              </g>
+                            );
+                          })}
 
-                          {/* 2. Projected Relations Path: GammaProj -> BetaProj -> AlphaProj */}
-                          {drawLink(tX(projected.Gamma[1]), tY(projected.Gamma[0]), tX(projected.Beta[1]), tY(projected.Beta[0]), true)}
-                          {drawLink(tX(projected.Beta[1]), tY(projected.Beta[0]), tX(projected.Alpha[1]), tY(projected.Alpha[0]), true)}
-                          {drawLink(tX(projected.Gamma[1]), tY(projected.Gamma[0]), tX(projected.Delta[1]), tY(projected.Delta[0]), true)}
-                          {/* Expected/Target Relation (DeltaProj -> AlphaProj) in solid indigo */}
-                          {drawLink(tX(projected.Delta[1]), tY(projected.Delta[0]), tX(projected.Alpha[1]), tY(projected.Alpha[0]), true)}
+                          {/* Target relation (queryTarget -> queryNode) in Base space */}
+                          {queryNode && queryTarget && base[queryTarget] && base[queryNode] && (
+                            drawLink(tX(base[queryTarget][1]), tY(base[queryTarget][0]), tX(base[queryNode][1]), tY(base[queryNode][0]), false, true)
+                          )}
+
+                          {/* 2. Projected Relations Path: Dynamic from nodeDefinitions */}
+                          {nodeDefinitions.map((def, i) => {
+                            const parentCoord = projected[def.targetNode];
+                            const childCoord = projected[def.node];
+                            if (!parentCoord || !childCoord) return null;
+                            return (
+                              <g key={`projlink-${i}`}>
+                                {drawLink(tX(parentCoord[1]), tY(parentCoord[0]), tX(childCoord[1]), tY(childCoord[0]), true)}
+                              </g>
+                            );
+                          })}
+
+                          {/* Projected Query Target Relation (queryTargetProj -> queryNodeProj) */}
+                          {queryNode && queryTarget && projected[queryTarget] && projected[queryNode] && (
+                            drawLink(tX(projected[queryTarget][1]), tY(projected[queryTarget][0]), tX(projected[queryNode][1]), tY(projected[queryNode][0]), true)
+                          )}
 
                           {/* Base Points of All Relations */}
                           {Object.entries(base).map(([key, coords]) => (
@@ -417,17 +473,39 @@ export default function ContextProjector({
 
                         return (
                           <>
-                            {/* Base Links */}
-                            {drawLink(tW(base.Gamma[3]), tZ(base.Gamma[2]), tW(base.Beta[3]), tZ(base.Beta[2]), false)}
-                            {drawLink(tW(base.Beta[3]), tZ(base.Beta[2]), tW(base.Alpha[3]), tZ(base.Alpha[2]), false)}
-                            {drawLink(tW(base.Gamma[3]), tZ(base.Gamma[2]), tW(base.Delta[3]), tZ(base.Delta[2]), false)}
-                            {drawLink(tW(base.Delta[3]), tZ(base.Delta[2]), tW(base.Alpha[3]), tZ(base.Alpha[2]), false, true)}
+                            {/* Base Links: Dynamic from nodeDefinitions */}
+                            {nodeDefinitions.map((def, i) => {
+                              const parentCoord = base[def.targetNode];
+                              const childCoord = base[def.node];
+                              if (!parentCoord || !childCoord) return null;
+                              return (
+                                <g key={`baselink-b-${i}`}>
+                                  {drawLink(tW(parentCoord[3]), tZ(parentCoord[2]), tW(childCoord[3]), tZ(childCoord[2]), false)}
+                                </g>
+                              );
+                            })}
 
-                            {/* Projected Links */}
-                            {drawLink(tW(projected.Gamma[3]), tZ(projected.Gamma[2]), tW(projected.Beta[3]), tZ(projected.Beta[2]), true)}
-                            {drawLink(tW(projected.Beta[3]), tZ(projected.Beta[2]), tW(projected.Alpha[3]), tZ(projected.Alpha[2]), true)}
-                            {drawLink(tW(projected.Gamma[3]), tZ(projected.Gamma[2]), tW(projected.Delta[3]), tZ(projected.Delta[2]), true)}
-                            {drawLink(tW(projected.Delta[3]), tZ(projected.Delta[2]), tW(projected.Alpha[3]), tZ(projected.Alpha[2]), true)}
+                            {/* Target relation (queryTarget -> queryNode) in Base space */}
+                            {queryNode && queryTarget && base[queryTarget] && base[queryNode] && (
+                              drawLink(tW(base[queryTarget][3]), tZ(base[queryTarget][2]), tW(base[queryNode][3]), tZ(base[queryNode][2]), false, true)
+                            )}
+
+                            {/* Projected Links: Dynamic from nodeDefinitions */}
+                            {nodeDefinitions.map((def, i) => {
+                              const parentCoord = projected[def.targetNode];
+                              const childCoord = projected[def.node];
+                              if (!parentCoord || !childCoord) return null;
+                              return (
+                                <g key={`projlink-b-${i}`}>
+                                  {drawLink(tW(parentCoord[3]), tZ(parentCoord[2]), tW(childCoord[3]), tZ(childCoord[2]), true)}
+                                </g>
+                              );
+                            })}
+
+                            {/* Projected Query Target relation */}
+                            {queryNode && queryTarget && projected[queryTarget] && projected[queryNode] && (
+                              drawLink(tW(projected[queryTarget][3]), tZ(projected[queryTarget][2]), tW(projected[queryNode][3]), tZ(projected[queryNode][2]), true)
+                            )}
 
                             {/* Base Points */}
                             {Object.entries(base).map(([key, coords]) => (

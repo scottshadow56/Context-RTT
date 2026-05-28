@@ -47,6 +47,8 @@ export default function App() {
   const [contextDimension, setContextDimension] = useState<DimensionCount>(2);
   const [contextNodeDefinitions, setContextNodeDefinitions] = useState<any[]>([]);
   const [contextVehicles, setContextVehicles] = useState<any[]>([]);
+  const [contextQueryNode, setContextQueryNode] = useState<string>('');
+  const [contextQueryTarget, setContextQueryTarget] = useState<string>('');
 
   // Dimensional Space setting
   const [dimension, setDimension] = useState<DimensionCount>(2);
@@ -112,6 +114,8 @@ export default function App() {
     activeModifiers: number[];
     nodeDefinitions: any[];
     contextVehicles: any[];
+    queryNode?: string;
+    queryTarget?: string;
   }) => {
     setContextDimension(details.dimension);
     setContextBaseVector(details.baseVector);
@@ -121,6 +125,8 @@ export default function App() {
     setContextActiveModifiers(details.activeModifiers);
     setContextNodeDefinitions(details.nodeDefinitions || []);
     setContextVehicles(details.contextVehicles || []);
+    setContextQueryNode(details.queryNode || '');
+    setContextQueryTarget(details.queryTarget || '');
   };
 
   // Run Constraint Solver Dynamically
@@ -316,6 +322,8 @@ export default function App() {
                   activeModifiers={contextActiveModifiers}
                   nodeDefinitions={contextNodeDefinitions}
                   contextVehicles={contextVehicles}
+                  queryNode={contextQueryNode}
+                  queryTarget={contextQueryTarget}
                 />
               ) : (
                 <Visualizer

@@ -60,6 +60,8 @@ interface TrainingWorkspaceProps {
     activeModifiers: number[];
     nodeDefinitions: any[];
     contextVehicles: any[];
+    queryNode?: string;
+    queryTarget?: string;
   }) => void;
   isSubmitted: boolean;
   setIsSubmitted: (isSub: boolean) => void;
@@ -149,11 +151,12 @@ export function generateContextPuzzle(
     : (dim >= 4 ? 5 : (dim === 3 ? 4 : 3));
 
   const itemNames = generateUniqueCVCNames(maxNodesNeeded);
+  const backups = generateUniqueCVCNames(10).filter(n => !itemNames.includes(n));
   const GammaName = itemNames[0];
-  const BetaName = itemNames[1] || 'Beta';
-  const AlphaName = itemNames[2] || 'Alpha';
-  const DeltaName = itemNames[3] || 'Delta';
-  const OmegaName = itemNames[4] || 'Omega';
+  const BetaName = itemNames[1] || backups[0];
+  const AlphaName = itemNames[2] || backups[1];
+  const DeltaName = itemNames[3] || backups[2];
+  const OmegaName = itemNames[4] || backups[3];
 
   const nodesCoords: Record<string, number[]> = {
     [GammaName]: [0, 0, 0, 0]
@@ -913,6 +916,8 @@ export default function TrainingWorkspace({
         projectedRelationName: newCtxPuzzle.projectedRelation,
         nodeDefinitions: newCtxPuzzle.nodeDefinitions,
         contextVehicles: newCtxPuzzle.contextVehicles,
+        queryNode: newCtxPuzzle.queryNode,
+        queryTarget: newCtxPuzzle.queryTarget,
         activeModifiers: (() => {
           const aggregateScales = [1, 1, 1, 1];
           newCtxPuzzle.contextVehicles.forEach(cv => {
